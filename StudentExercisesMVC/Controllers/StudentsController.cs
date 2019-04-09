@@ -162,8 +162,6 @@ namespace StudentExercisesMVC.Controllers
             return View(viewModel);
         }
 
-
-
         // POST: Students/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -180,8 +178,8 @@ namespace StudentExercisesMVC.Controllers
                                             SET FirstName = @FirstName,
                                                 LastName = @LastName,
                                                 Slack = @Slack,
-                                                Cohord_id = @Cohort_id
-                                            WHERE id = @id";
+                                                Cohort_id = @Cohort_id
+                                            WHERE Id = @id";
 
                         cmd.Parameters.Add(new SqlParameter("@FirstName", viewModel.Student.FirstName));
                         cmd.Parameters.Add(new SqlParameter("@LastName", viewModel.Student.LastName));
@@ -190,7 +188,6 @@ namespace StudentExercisesMVC.Controllers
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         cmd.ExecuteNonQuery();
-
                         return RedirectToAction(nameof(Index));
                     }
                 }

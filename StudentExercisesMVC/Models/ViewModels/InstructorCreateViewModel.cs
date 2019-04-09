@@ -30,7 +30,7 @@ namespace StudentExercisesMVC.Models.ViewModels
 
                     while (reader.Read())
                     {
-                        Cohorts.Add(new Cohort //why is this not a closed )?
+                        Cohorts.Add(new Cohort
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             CohortName = reader.GetString(reader.GetOrdinal("CohortName"))
@@ -44,7 +44,7 @@ namespace StudentExercisesMVC.Models.ViewModels
         public Instructor Instructor { get; set; }
         public List<Cohort> Cohorts { get; set; }
 
-        public List<SelectListItem> CohortOptions //what is going on here?
+        public List<SelectListItem> CohortOptions
         {
             get
             {
