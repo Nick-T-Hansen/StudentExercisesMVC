@@ -77,7 +77,9 @@ namespace StudentExercisesMVC.Controllers
         // GET: Instructors/Create
         public ActionResult Create()
         {
-            return View();
+            //A GET has to be completed to create the form which will be used to POST the new data
+            InstructorCreateViewModel viewModel = new InstructorCreateViewModel(_config.GetConnectionString("DefaultConnection"));
+                return View(viewModel);
         }
 
         // POST: Instructors/Create
