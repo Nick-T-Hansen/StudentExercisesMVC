@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using StudentExercisesMVC.Models;
+using StudentExercisesMVC.Models.ViewModels;
 
 namespace StudentExercisesMVC.Controllers
 {
@@ -79,23 +80,38 @@ namespace StudentExercisesMVC.Controllers
         {
             //A GET has to be completed to create the form which will be used to POST the new data
             InstructorCreateViewModel viewModel = new InstructorCreateViewModel(_config.GetConnectionString("DefaultConnection"));
-                return View(viewModel);
+            return View(viewModel);
         }
 
         // POST: Instructors/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(InstructorCreateViewModel viewModel)
         {
             try
             {
-                // TODO: Add insert logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"INSERT INTO instructor (FirstName, LastName, Slack, Cohort_id)
+                                             VALUES (@FirstName, @LastName, @Slack, @Cohort_id)";
+                        cmd.Parameters.Add(new SqlParameter("@FirstName", viewModel.Instructor.FirstName));
+                        cmd.Parameters.Add(new SqlParameter("@LastName", viewModel.Instructor.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@Slack", viewModel.Instructor.Slack));
+                        cmd.Parameters.Add(new SqlParameter("@Cohort_id", viewModel.Instructor.CohortId));
 
-                return RedirectToAction(nameof(Index));
+                        cmd.ExecuteNonQuery();
+
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
             }
             catch
             {
-                return View();
+                viewModel.Cohorts = GetAllCohorts();
+                return View(viewModel);
             }
         }
 
@@ -142,6 +158,33 @@ namespace StudentExercisesMVC.Controllers
             catch
             {
                 return View();
+            }
+        }
+        private List<Cohort> GetAllCohorts()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT Id, CohortName 
+                                        FROM Cohort;";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<Cohort> cohorts = new List<Cohort>();
+
+                    while (reader.Read())
+                    {
+                        cohorts.Add(new Cohort
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            CohortName = reader.GetString(reader.GetOrdinal("CohortName"))
+                        });
+                    }
+                    reader.Close();
+
+                    return cohorts;
+                }
             }
         }
     }
