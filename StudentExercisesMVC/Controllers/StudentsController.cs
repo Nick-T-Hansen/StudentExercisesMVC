@@ -162,8 +162,6 @@ namespace StudentExercisesMVC.Controllers
             return View(viewModel);
         }
 
-
-
         // POST: Students/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -180,8 +178,8 @@ namespace StudentExercisesMVC.Controllers
                                             SET FirstName = @FirstName,
                                                 LastName = @LastName,
                                                 Slack = @Slack,
-                                                Cohord_id = @Cohort_id
-                                            WHERE id = @id";
+                                                Cohort_id = @Cohort_id
+                                            WHERE Id = @id";
 
                         cmd.Parameters.Add(new SqlParameter("@FirstName", viewModel.Student.FirstName));
                         cmd.Parameters.Add(new SqlParameter("@LastName", viewModel.Student.LastName));
@@ -190,7 +188,6 @@ namespace StudentExercisesMVC.Controllers
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         cmd.ExecuteNonQuery();
-
                         return RedirectToAction(nameof(Index));
                     }
                 }
@@ -205,25 +202,42 @@ namespace StudentExercisesMVC.Controllers
         // GET: Students/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            Student student = GetStudentById(id);
+            if (student == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return View(student);
+            }
+
         }
 
         // POST: Students/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, Student student)
         {
-            try
-            {
-                // TODO: Add delete logic here
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch
+            using (SqlConnection conn = Connection)
             {
-                return View();
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"DELETE FROM Student 
+                                             WHERE Id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                   cmd.ExecuteNonQuery();
+                                     
+                   return RedirectToAction(nameof(Index));
+                }
             }
+
         }
+    
+        
         private Student GetStudentById(int id) //reusable code to get a student by their ID
         {
             using (SqlConnection conn = Connection)
